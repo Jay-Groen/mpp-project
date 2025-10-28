@@ -1,0 +1,13 @@
+name,skill_proficiencies,skill_proficiencies_amount,spellcasting_type,caster_progression
+Barbarian,"Animal Handling,Athletics,Intimidation,Nature,Perception,Survival",2,none,none
+Bard,"Acrobatics,Animal Handling,Arcana,Deception,History,Insight,Intimidation,Investigation,Medicine,Nature,Perception,Performance,Persuasion,Religion,Sleight of Hand,Stealth,Survival",3,learned,full
+Cleric,"History,Insight,Medicine,Persuasion,Religion",2,prepared,full
+Druid,"Arcana,Animal Handling,Insight,Medicine,Nature,Perception,Religion,Survival",2,prepared,full
+Fighter,"Acrobatics,Animal Handling,Athletics,History,Insight,Intimidation,Perception,Survival",2,none,none
+Monk,"Acrobatics,Athletics,History,Insight,Religion,Stealth",2,none,none
+Paladin,"Athletics,Insight,Intimidation,Medicine,Persuasion,Religion",2,prepared,half
+Ranger,"Animal Handling,Athletics,Insight,Investigation,Nature,Perception,Stealth,Survival",3,learned,half
+Rogue,"Acrobatics,Athletics,Deception,Insight,Intimidation,Investigation,Perception,Performance,Persuasion,Sleight of Hand,Stealth",4,none,none
+Sorcerer,"Arcana,Deception,Insight,Intimidation,Persuasion,Religion",2,learned,full
+Warlock,"Arcana,Deception,History,Intimidation,Investigation,Nature,Religion",2,learned,pact
+Wizard,"Arcana,History,Insight,Investigation,Medicine,Religion",2,prepared,full
