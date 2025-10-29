@@ -8,12 +8,19 @@ import (
 	"strings"
 )
 
-func LoadSpells() ([]domain.Spell, error) {
+type CSVSpellRepository struct {
+	path string
+}
 
-	spellsFile := "data/5e-SRD-Spells.csv"
+func NewCSVSpellRepository(path string) *CSVSpellRepository {
+	return &CSVSpellRepository{path: path}
+}
 
-	path := spellsFile
-	file, err := os.Open(path)
+// Compile-time check
+var _ domain.SpellCSVLoader = (*CSVSpellRepository)(nil)
+
+func (r *CSVSpellRepository) LoadSpells() ([]domain.Spell, error) {
+	file, err := os.Open(r.path)
 	if err != nil {
 		return nil, err
 	}

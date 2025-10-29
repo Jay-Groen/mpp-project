@@ -7,15 +7,22 @@ import (
 	"strconv"
 )
 
+type CSVRaceRepository struct {
+	path string
+}
+
+func NewCSVRaceRepository(path string) *CSVRaceRepository {
+	return &CSVRaceRepository{path: path}
+}
+
+// Compile-time check
+var _ domain.RaceCSVLoader = (*CSVRaceRepository)(nil)
+
 // LoadRaces reads races from a CSV file.
 // CSV format example:
 // Name,STR,DEX,CON,INT,WIS,CHA,Choice,ChoiceAmount,ChoiceAddAmount
-func LoadRaces() ([]domain.Race, error) {
-	
-	racesFile := "data/races.csv"
-
-	path := racesFile
-	file, err := os.Open(path)
+func (r *CSVRaceRepository) LoadRaces() ([]domain.Race, error) {
+	file, err := os.Open(r.path)
 	if err != nil {
 		return nil, err
 	}

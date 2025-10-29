@@ -1,184 +1,119 @@
 package service
 
 import (
-	"encoding/csv"
 	"fmt"
-	"herkansing/onion/dndapi"
 	"herkansing/onion/domain"
 	"log"
-	"os"
 	"strings"
 )
 
+// EquipmentService orchestrates equipment logic between repositories and API fetchers.
 type EquipmentService struct {
-	CSVPath   string
-	equipment []domain.Equipment
+	apiFetcher domain.EquipmentAPIFetcher
+	csvLoader  domain.EquipmentCSVLoader
 }
 
-func NewEquipmentService(csvPath string) (*EquipmentService, error) {
-	s := &EquipmentService{CSVPath: csvPath}
-	err := s.load()
+// NewEquipmentService creates a new service with CSV and API data sources.
+func NewEquipmentService(apiFetcher domain.EquipmentAPIFetcher, csvLoader domain.EquipmentCSVLoader) *EquipmentService {
+	return &EquipmentService{
+		apiFetcher: apiFetcher,
+		csvLoader:  csvLoader,
+	}
+}
+
+// LoadEquipmentFromCSV loads all equipment entries from CSV via repository.
+func (s *EquipmentService) LoadEquipmentFromCSV() ([]domain.Equipment, error) {
+	equipment, err := s.csvLoader.LoadEquipment()
 	if err != nil {
 		return nil, err
 	}
-	return s, nil
+
+	return equipment, nil
 }
 
-func NewEquipmentAPIService() *EquipmentService {
-	return &EquipmentService{}
+// GetEquipmentByCategory returns names of equipment by category from CSV.
+func (s *EquipmentService) GetEquipmentByCategory(category string) []string {
+	if s.csvLoader == nil {
+		log.Println("⚠️ No CSV loader configured; returning empty result")
+		return []string{}
+	}
+	return s.csvLoader.GetByCategory(category)
 }
 
-// Load CSV into memory
-func (s *EquipmentService) load() error {
-	file, err := os.Open(s.CSVPath)
-	if err != nil {
-		return err
-	}
-	defer file.Close()
-
-	reader := csv.NewReader(file)
-	records, err := reader.ReadAll()
-	if err != nil {
-		return err
-	}
-
-	for i, rec := range records {
-		if i == 0 {
-			continue // skip header
-		}
-
-		name := rec[0]
-		etype := strings.ToLower(rec[1])
-
-		apiItem := dndapi.APIEquipment{Name: name}
-
-		switch etype {
-		case "weapon":
-			s.equipment = append(s.equipment, domain.Equipment{
-				MainHand: domain.Weapon{APIEquipment: apiItem},
-			})
-
-		case "offhand":
-			s.equipment = append(s.equipment, domain.Equipment{
-				OffHand: domain.Weapon{APIEquipment: apiItem},
-			})
-
-		case "armor":
-			s.equipment = append(s.equipment, domain.Equipment{
-				Armor: domain.Armor{APIEquipment: apiItem},
-			})
-
-		case "shield":
-			s.equipment = append(s.equipment, domain.Equipment{
-				Shield: domain.Shield{APIEquipment: apiItem},
-			})
-
-		default:
-			s.equipment = append(s.equipment, domain.Equipment{
-				Gear: domain.Gear{APIEquipment: apiItem},
-			})
-		}
-	}
-
-	return nil
-}
-
-// Get equipment filtered by category
-func (s *EquipmentService) GetByCategory(category string) []string {
-	var results []string
-	for _, e := range s.equipment {
-		switch strings.ToLower(category) {
-		case "weapon":
-			if e.MainHand.APIEquipment.Name != "" {
-				results = append(results, e.MainHand.APIEquipment.Name)
-			}
-		case "armor":
-			if e.Armor.APIEquipment.Name != "" {
-				results = append(results, e.Armor.APIEquipment.Name)
-			}
-		case "shield":
-			if e.Shield.APIEquipment.Name != "" {
-				results = append(results, e.Shield.APIEquipment.Name)
-			}
-		case "gear":
-			if e.Gear.APIEquipment.Name != "" {
-				results = append(results, e.Gear.APIEquipment.Name)
-			}
-		}
-	}
-	return results
-}
-
-// AddEquipmentToCharacter adds the chosen APIEquipment to the correct slot of a character
-func (s *EquipmentService) AddEquipmentToCharacter(c *domain.Character, category string, item dndapi.APIEquipment) {
-	switch category {
-	case "main hand":
-		c.Equipment.MainHand = domain.Weapon{APIEquipment: item}
-	case "off hand":
-		c.Equipment.OffHand = domain.Weapon{APIEquipment: item}
+// AddEquipmentToCharacter adds an EquipmentSpecific item to the correct slot.
+func (s *EquipmentService) AddEquipmentToCharacter(c *domain.Character, category string, item domain.EquipmentSpecific) {
+	switch strings.ToLower(category) {
+	case "main hand", "mainhand":
+		c.Equipment.MainHand = domain.Weapon{EquipmentSpecific: item}
+	case "off hand", "offhand":
+		c.Equipment.OffHand = domain.Weapon{EquipmentSpecific: item}
 	case "armor":
-		c.Equipment.Armor = domain.Armor{APIEquipment: item}
+		c.Equipment.Armor = domain.Armor{EquipmentSpecific: item}
 	case "shield":
-		c.Equipment.Shield = domain.Shield{APIEquipment: item}
+		c.Equipment.Shield = domain.Shield{EquipmentSpecific: item}
 	case "gear":
-		c.Equipment.Gear = domain.Gear{APIEquipment: item}
+		c.Equipment.Gear = domain.Gear{EquipmentSpecific: item}
 	}
 }
 
-// EnrichEquipment concurrently fetches and enriches all equipment items inside a Character's Equipment struct.
+// EnrichEquipment concurrently fetches details from the D&D API.
 func (s *EquipmentService) EnrichEquipment(e *domain.Equipment) error {
 	if e == nil {
 		return fmt.Errorf("equipment is nil")
 	}
 
-	// 1️⃣ Collect all non-empty equipment names
-	var names []string
-	nameToSlot := make(map[string]string) // tracks where each piece belongs (MainHand, OffHand, etc.)
+	if s.apiFetcher == nil {
+		return fmt.Errorf("no API fetcher provided")
+	}
 
-	if e.MainHand.APIEquipment.Name != "" {
-		names = append(names, e.MainHand.APIEquipment.Name)
-		nameToSlot[e.MainHand.APIEquipment.Name] = "MainHand"
+	// 1️⃣ Collect names and map them to slots
+	var names []string
+	slotMap := map[string]string{}
+
+	if e.MainHand.EquipmentSpecific.Name != "" {
+		names = append(names, e.MainHand.EquipmentSpecific.Name)
+		slotMap[e.MainHand.EquipmentSpecific.Name] = "MainHand"
 	}
-	if e.OffHand.APIEquipment.Name != "" {
-		names = append(names, e.OffHand.APIEquipment.Name)
-		nameToSlot[e.OffHand.APIEquipment.Name] = "OffHand"
+	if e.OffHand.EquipmentSpecific.Name != "" {
+		names = append(names, e.OffHand.EquipmentSpecific.Name)
+		slotMap[e.OffHand.EquipmentSpecific.Name] = "OffHand"
 	}
-	if e.Armor.APIEquipment.Name != "" {
-		names = append(names, e.Armor.APIEquipment.Name)
-		nameToSlot[e.Armor.APIEquipment.Name] = "Armor"
+	if e.Armor.EquipmentSpecific.Name != "" {
+		names = append(names, e.Armor.EquipmentSpecific.Name)
+		slotMap[e.Armor.EquipmentSpecific.Name] = "Armor"
 	}
-	if e.Shield.APIEquipment.Name != "" {
-		names = append(names, e.Shield.APIEquipment.Name)
-		nameToSlot[e.Shield.APIEquipment.Name] = "Shield"
+	if e.Shield.EquipmentSpecific.Name != "" {
+		names = append(names, e.Shield.EquipmentSpecific.Name)
+		slotMap[e.Shield.EquipmentSpecific.Name] = "Shield"
 	}
-	if e.Gear.APIEquipment.Name != "" {
-		names = append(names, e.Gear.APIEquipment.Name)
-		nameToSlot[e.Gear.APIEquipment.Name] = "Gear"
+	if e.Gear.EquipmentSpecific.Name != "" {
+		names = append(names, e.Gear.EquipmentSpecific.Name)
+		slotMap[e.Gear.EquipmentSpecific.Name] = "Gear"
 	}
 
 	if len(names) == 0 {
 		return fmt.Errorf("no equipment to enrich")
 	}
 
-	// 2️⃣ Fetch all equipment concurrently
-	fetched, err := dndapi.FetchMultipleEquipment(names)
+	// 2️⃣ Fetch all details concurrently using API
+	fetched, err := s.apiFetcher.FetchMultipleEquipment(names)
 	if err != nil {
 		return fmt.Errorf("failed to fetch equipment: %w", err)
 	}
 
-	// 3️⃣ Assign each fetched piece back to the correct field
+	// 3️⃣ Assign back to correct slots
 	for _, eq := range fetched {
-		switch nameToSlot[eq.Name] {
+		switch slotMap[eq.Name] {
 		case "MainHand":
-			e.MainHand.APIEquipment = eq
+			e.MainHand.EquipmentSpecific = eq
 		case "OffHand":
-			e.OffHand.APIEquipment = eq
+			e.OffHand.EquipmentSpecific = eq
 		case "Armor":
-			e.Armor.APIEquipment = eq
+			e.Armor.EquipmentSpecific = eq
 		case "Shield":
-			e.Shield.APIEquipment = eq
+			e.Shield.EquipmentSpecific = eq
 		case "Gear":
-			e.Gear.APIEquipment = eq
+			e.Gear.EquipmentSpecific = eq
 		}
 	}
 

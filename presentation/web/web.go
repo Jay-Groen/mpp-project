@@ -1,10 +1,8 @@
 package main
 
 import (
-	"database/sql"
 	"herkansing/onion/domain"
-	"herkansing/onion/repository"
-	"herkansing/onion/service"
+	"herkansing/onion/presentation"
 	"html/template"
 	"log"
 	"net/http"
@@ -14,42 +12,27 @@ import (
 )
 
 func main() {
-	db, err := sql.Open("sqlite3", "./data/characters.db")
-	if err != nil {
-		log.Fatal(err)
-	}
+	app, db := presentation.InitializeApp()
+
 	defer db.Close()
-
-	// Initialize repository
-	repo := repository.NewSQLiteCharacterRepository(db)
-
-	// Inject repository into service
-	charService := service.NewCharacterService(repo)
 
 	tmpl := template.Must(template.ParseGlob(filepath.Join("./presentation/web", "*.html")))
 
 	// List all characters
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		rows, err := db.Query("SELECT id, name FROM characters")
+		chars, err := app.CharacterService.ListCharacters()
 		if err != nil {
-			http.Error(w, "DB query error", 500)
+			log.Printf("Failed to get characters: %v", err)
+			http.Error(w, "Failed to load characters", http.StatusInternalServerError)
 			return
-		}
-		defer rows.Close()
-
-		var chars []domain.Character
-		for rows.Next() {
-			var c domain.Character // ✅ single struct
-			if err := rows.Scan(&c.Id, &c.Name); err != nil {
-				log.Println("scan error:", err)
-				continue
-			}
-			chars = append(chars, c) // ✅ append struct to slice
 		}
 
 		if err := tmpl.ExecuteTemplate(w, "index.html", chars); err != nil {
-			http.Error(w, "Template error", 500)
+			log.Printf("Template execution error: %v", err)
+			http.Error(w, "Template error", http.StatusInternalServerError)
+			return
 		}
+
 	})
 
 	http.HandleFunc("/character", func(w http.ResponseWriter, r *http.Request) {
@@ -59,7 +42,7 @@ func main() {
 			return
 		}
 
-		c, err := charService.GetCharacterByID(id)
+		c, err := app.CharacterService.GetCharacterByID(id)
 		if err != nil {
 			if err.Error() == "character not found" {
 				http.Error(w, "Character not found", 404)
@@ -72,13 +55,11 @@ func main() {
 
 		// 🧙 Enrich the data concurrently using the new concurrent fetchers
 		// (These functions internally use goroutines to speed things up)
-		equipmentService := service.NewEquipmentAPIService()
-		if err := equipmentService.EnrichEquipment(&c.Equipment); err != nil {
+		if err := app.EquipmentService.EnrichEquipment(&c.Equipment); err != nil {
 			log.Println("Error enriching equipment:", err)
 		}
 
-		spellService := service.NewSpellService()
-		if err := spellService.EnrichSpells(&c.Spellbook); err != nil {
+		if err := app.SpellService.EnrichSpells(&c.Spellbook); err != nil {
 			log.Println("Error enriching spells:", err)
 		}
 
@@ -86,7 +67,7 @@ func main() {
 		filled := []domain.SpellSlot{}
 		empty := []domain.SpellSlot{}
 
-		for _, slot := range c.Spellbook.SpellSlot {
+		for _, slot := range c.Spellbook.SpellSlots {
 			if slot.Spell.Name != "" {
 				filled = append(filled, slot)
 			} else {
@@ -95,7 +76,7 @@ func main() {
 		}
 
 		// Merge filled slots first, then empty
-		c.Spellbook.SpellSlot = append(filled, empty...)
+		c.Spellbook.SpellSlots = append(filled, empty...)
 
 		// 🧾 Render the character sheet with enriched info
 		if err := tmpl.ExecuteTemplate(w, "charactersheet.html", &c); err != nil {

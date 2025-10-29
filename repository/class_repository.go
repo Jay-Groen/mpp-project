@@ -8,16 +8,23 @@ import (
 	"strings"
 )
 
+type CSVClassRepository struct {
+	path string
+}
+
+func NewCSVClassRepository(path string) *CSVClassRepository {
+	return &CSVClassRepository{path: path}
+}
+
+// Compile-time check
+var _ domain.ClassCSVLoader = (*CSVClassRepository)(nil)
+
 // LoadClasses reads class definitions from a CSV file.
 // CSV format example:
 // Name,SkillProficiencies,SkillProficienciesAmount
 // Fighter,"Athletics,Survival",2
-func LoadClasses() ([]domain.Class, error) {
-
-	classesFile := "data/classes.csv"
-
-	path := classesFile
-	file, err := os.Open(path)
+func (r *CSVClassRepository) LoadClasses() ([]domain.Class, error) {
+	file, err := os.Open(r.path)
 	if err != nil {
 		return nil, err
 	}

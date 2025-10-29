@@ -2,11 +2,18 @@ package service
 
 import (
 	"errors"
-	"herkansing/onion/dndapi"
 	"herkansing/onion/domain"
 
 	"github.com/google/uuid"
 )
+
+type CharacterService struct {
+	repo domain.CharacterRepository
+}
+
+func NewCharacterService(repo domain.CharacterRepository) *CharacterService {
+	return &CharacterService{repo: repo}
+}
 
 func (s *CharacterService) ListCharacters() ([]domain.Character, error) {
 	return s.repo.ListCharacters()
@@ -98,19 +105,19 @@ func (s *CharacterService) CreateCharacter(
 
 	// Apply skill modifiers based on ability scores
 	skillModifiers := char.SkillModifiers()
-	ApplyModifiers(&char.Skills, skillModifiers)
+	domain.ApplyModifiers(&char.Skills, skillModifiers)
 
 	// Initialize empty equipment
 	char.Equipment = domain.Equipment{
 		MainHand: domain.Weapon{},
-		OffHand: domain.Weapon{},
-		Armor:  domain.Armor{},
-		Shield: domain.Shield{},
-		Gear:   domain.Gear{},
+		OffHand:  domain.Weapon{},
+		Armor:    domain.Armor{},
+		Shield:   domain.Shield{},
+		Gear:     domain.Gear{},
 	}
 
 	// Initialize spell slots
-	char.Spellbook = NewEmptySpellSlots(char.Level, char.Class.CasterProgression)
+	char.Spellbook = domain.NewEmptySpellSlots(char.Level, char.Class.CasterProgression)
 
 	// Persist the character using the repository
 	err := s.repo.AddCharacter(char)
@@ -121,28 +128,8 @@ func (s *CharacterService) CreateCharacter(
 	return char, nil
 }
 
-// Initialize empty spell slots for a character based on their level
-func NewEmptySpellSlots(charLevel int, casterProgression string) domain.Spellbook {
-	var slots []domain.SpellSlot
-
-	// SpellSlotsByLevel returns []int, e.g. [4,3,2,...] for number of slots per level
-	slotCounts := domain.SpellSlotsByLevel(charLevel, casterProgression)
-
-	for i, count := range slotCounts {
-		slotLevel := i + 1 // 1st-level, 2nd-level, etc.
-		for j := 0; j < count; j++ {
-			slots = append(slots, domain.SpellSlot{
-				Spell: dndapi.APISpell{}, // empty slot
-				Level: slotLevel,         // slot level
-			})
-		}
-	}
-
-	return domain.Spellbook{SpellSlot: slots}
-}
-
 func (s *CharacterService) UpdateSpellSlots(char *domain.Character) {
-	char.Spellbook = NewEmptySpellSlots(char.Level, char.Class.CasterProgression)
+	char.Spellbook = domain.NewEmptySpellSlots(char.Level, char.Class.CasterProgression)
 }
 
 // UpdateLevel sets a new level and recalculates proficiency bonus
@@ -153,52 +140,9 @@ func (s *CharacterService) UpdateLevel(level int, c *domain.Character) error {
 	c.Level = level
 	c.ProficiencyBonus = domain.ProficiencyBonusByLevel(level)
 	skillModifiersMap := c.SkillModifiers()
-	ApplyModifiers(&c.Skills, skillModifiersMap)
+	domain.ApplyModifiers(&c.Skills, skillModifiersMap)
 
 	s.UpdateSpellSlots(c)
 
 	return nil
-}
-
-func ApplyModifiers(s *domain.Skills, modifiers map[string]int) {
-	for skillName, mod := range modifiers {
-		switch skillName {
-		case "Acrobatics":
-			s.Acrobatics.Modifier = mod
-		case "Animal Handling":
-			s.AnimalHandling.Modifier = mod
-		case "Arcana":
-			s.Arcana.Modifier = mod
-		case "Athletics":
-			s.Athletics.Modifier = mod
-		case "Deception":
-			s.Deception.Modifier = mod
-		case "History":
-			s.History.Modifier = mod
-		case "Insight":
-			s.Insight.Modifier = mod
-		case "Intimidation":
-			s.Intimidation.Modifier = mod
-		case "Investigation":
-			s.Investigation.Modifier = mod
-		case "Medicine":
-			s.Medicine.Modifier = mod
-		case "Nature":
-			s.Nature.Modifier = mod
-		case "Perception":
-			s.Perception.Modifier = mod
-		case "Performance":
-			s.Performance.Modifier = mod
-		case "Persuasion":
-			s.Persuasion.Modifier = mod
-		case "Religion":
-			s.Religion.Modifier = mod
-		case "Sleight of Hand":
-			s.SleightOfHand.Modifier = mod
-		case "Stealth":
-			s.Stealth.Modifier = mod
-		case "Survival":
-			s.Survival.Modifier = mod
-		}
-	}
 }

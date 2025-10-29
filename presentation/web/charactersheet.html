@@ -64,7 +64,7 @@
                 </div>
                 <div class="modifier">
                   <input name="Dexteritymod" value="{{.AbilityScores.Dexterity.Modifier}}" placeholder="+0"
-                    class=statmod />
+                    class="statmod" />
                 </div>
               </li>
               <li>
@@ -83,7 +83,7 @@
                     value="{{.AbilityScores.Wisdom.Score}}" placeholder="10" class="stat" />
                 </div>
                 <div class="modifier">
-                  <input name="Wisdommod" value="{{.AbilityScores.Wisdom.Modifier}}" placeholder="+0" />
+                  <input name="Wisdommod" value="{{.AbilityScores.Wisdom.Modifier}}" placeholder="+0" class="statmod" />
                 </div>
               </li>
               <li>
@@ -352,7 +352,7 @@
         </section>
         <section class="attacksandspellcasting">
           <div>
-            <label>Attacks & Spellcasting</label>
+            <label>Attacks &amp; Spellcasting</label>
 
             <table>
               <thead>
@@ -365,14 +365,18 @@
                 </tr>
               </thead>
               <tbody>
-                {{range .Spellbook.SpellSlot}}
+                {{range .Spellbook.SpellSlots}}
                 <tr>
                   <td>{{.Spell.Name}}</td>
                   <td>{{.Spell.Level}}</td>
                   <td>
+                    {{if .Spell.Damage}}
                     {{if .Spell.Damage.DamageType.Name}}
-                    {{.Spell.Damage.DamageType.Name}} ({{range $lvl, $dmg :=
-                    .Spell.Damage.DamageAtCharacterLevel}}{{$lvl}}: {{$dmg}} {{end}})
+                    {{.Spell.Damage.DamageType.Name}}
+                    ({{range $lvl, $dmg := .Spell.Damage.DamageAtCharacterLevel}}{{$lvl}}: {{$dmg}} {{end}})
+                    {{else}}
+                    —
+                    {{end}}
                     {{else}}
                     —
                     {{end}}
@@ -389,49 +393,49 @@
         <section class="equipment">
           <div>
             <label>Equipment</label>
-
             <div class="items">
               <ul>
-                {{if .Equipment.MainHand.APIEquipment.Name}}
+                {{if .Equipment.MainHand.EquipmentSpecific.Name}}
                 <li>
-                  <strong>Main Hand:</strong> {{.Equipment.MainHand.APIEquipment.Name}}
-                  {{if .Equipment.MainHand.APIEquipment.Damage}}
-                  ({{.Equipment.MainHand.APIEquipment.Damage.DamageDice}}
-                  {{.Equipment.MainHand.APIEquipment.Damage.DamageType.Name}})
+                  <strong>Main Hand:</strong> {{.Equipment.MainHand.EquipmentSpecific.Name}}
+                  {{if .Equipment.MainHand.EquipmentSpecific.Damage}}
+                  ({{.Equipment.MainHand.EquipmentSpecific.Damage.DamageDice}}
+                  {{.Equipment.MainHand.EquipmentSpecific.Damage.DamageType.Name}})
                   {{end}}
                 </li>
                 {{end}}
 
-                {{if .Equipment.OffHand.APIEquipment.Name}}
+                {{if .Equipment.OffHand.EquipmentSpecific.Name}}
                 <li>
-                  <strong>Off Hand:</strong> {{.Equipment.OffHand.APIEquipment.Name}}
+                  <strong>Off Hand:</strong> {{.Equipment.OffHand.EquipmentSpecific.Name}}
                 </li>
                 {{end}}
 
-                {{if .Equipment.Armor.APIEquipment.Name}}
+                {{if .Equipment.Armor.EquipmentSpecific.Name}}
                 <li>
-                  <strong>Armor:</strong> {{.Equipment.Armor.APIEquipment.Name}}
-                  {{if .Equipment.Armor.APIEquipment.ArmorClass}}
-                  (AC {{.Equipment.Armor.APIEquipment.ArmorClass.Base}})
+                  <strong>Armor:</strong> {{.Equipment.Armor.EquipmentSpecific.Name}}
+                  {{if .Equipment.Armor.EquipmentSpecific.ArmorClass}}
+                  (AC {{.Equipment.Armor.EquipmentSpecific.ArmorClass.Base}})
                   {{end}}
                 </li>
                 {{end}}
 
-                {{if .Equipment.Shield.APIEquipment.Name}}
+                {{if .Equipment.Shield.EquipmentSpecific.Name}}
                 <li>
-                  <strong>Shield:</strong> {{.Equipment.Shield.APIEquipment.Name}}
+                  <strong>Shield:</strong> {{.Equipment.Shield.EquipmentSpecific.Name}}
                 </li>
                 {{end}}
 
-                {{if .Equipment.Gear.APIEquipment.Name}}
+                {{if .Equipment.Gear.EquipmentSpecific.Name}}
                 <li>
-                  <strong>Gear:</strong> {{.Equipment.Gear.APIEquipment.Name}}
+                  <strong>Gear:</strong> {{.Equipment.Gear.EquipmentSpecific.Name}}
                 </li>
                 {{end}}
               </ul>
             </div>
           </div>
         </section>
+
 
       </section>
       <section>

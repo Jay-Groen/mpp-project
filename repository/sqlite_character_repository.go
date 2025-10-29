@@ -121,10 +121,10 @@ func (r *SQLiteCharacterRepository) GetCharacterByID(id string) (domain.Characte
 	return c, nil
 }
 
-// ListCharacters returns all Characters from the database
 func (r *SQLiteCharacterRepository) ListCharacters() ([]domain.Character, error) {
 	rows, err := r.DB.Query(`
-		SELECT id, name, race, class, level, background, proficiency_bonus, ability_scores_json, skills_json, equipment_json, spell_slots_json
+		SELECT id, name, race, class, level, background, proficiency_bonus,
+		       ability_scores_json, skills_json, equipment_json, spell_slots_json
 		FROM characters`)
 	if err != nil {
 		return nil, err
@@ -135,13 +135,14 @@ func (r *SQLiteCharacterRepository) ListCharacters() ([]domain.Character, error)
 
 	for rows.Next() {
 		var c domain.Character
+		var raceName, className string
 		var abilityJSON, skillsJSON, equipmentJSON, spellbookJSON string
 
 		if err := rows.Scan(
 			&c.Id,
 			&c.Name,
-			&c.Race.Name,
-			&c.Class.Name,
+			&raceName,
+			&className,
 			&c.Level,
 			&c.Background,
 			&c.ProficiencyBonus,
@@ -153,16 +154,32 @@ func (r *SQLiteCharacterRepository) ListCharacters() ([]domain.Character, error)
 			return nil, err
 		}
 
-		json.Unmarshal([]byte(abilityJSON), &c.AbilityScores)
-		json.Unmarshal([]byte(skillsJSON), &c.Skills)
-		json.Unmarshal([]byte(equipmentJSON), &c.Equipment)
-		json.Unmarshal([]byte(spellbookJSON), &c.Spellbook)
+		c.Race = domain.Race{Name: raceName}
+		c.Class = domain.Class{Name: className}
+
+		if err := json.Unmarshal([]byte(abilityJSON), &c.AbilityScores); err != nil {
+			log.Printf("Warning: failed to parse ability scores for %s: %v", c.Name, err)
+		}
+		if err := json.Unmarshal([]byte(skillsJSON), &c.Skills); err != nil {
+			log.Printf("Warning: failed to parse skills for %s: %v", c.Name, err)
+		}
+		if err := json.Unmarshal([]byte(equipmentJSON), &c.Equipment); err != nil {
+			log.Printf("Warning: failed to parse equipment for %s: %v", c.Name, err)
+		}
+		if err := json.Unmarshal([]byte(spellbookJSON), &c.Spellbook); err != nil {
+			log.Printf("Warning: failed to parse spellbook for %s: %v", c.Name, err)
+		}
 
 		characters = append(characters, c)
 	}
 
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
 	return characters, nil
 }
+
 
 // DeleteCharacter removes a Character by ID
 func (r *SQLiteCharacterRepository) DeleteCharacter(id string) error {
