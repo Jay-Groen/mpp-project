@@ -8,15 +8,15 @@ import (
 	"log"
 )
 
+// SQLiteCharacterRepository implements domain.CharacterRepository using SQLite.
 type SQLiteCharacterRepository struct {
 	DB *sql.DB
 }
 
-// NewSQLiteCharacterRepository initializes the repository and creates tables if needed
+// NewSQLiteCharacterRepository initializes the repository and ensures the characters table exists.
 func NewSQLiteCharacterRepository(db *sql.DB) domain.CharacterRepository {
 	repo := &SQLiteCharacterRepository{DB: db}
 
-	// Create tables if they don't exist
 	createTableSQL := `
 	CREATE TABLE IF NOT EXISTS characters (
 		id TEXT PRIMARY KEY,
@@ -29,20 +29,24 @@ func NewSQLiteCharacterRepository(db *sql.DB) domain.CharacterRepository {
 		ability_scores_json TEXT,
 		skills_json TEXT,
 		equipment_json TEXT,
-		spell_slots_json TEXT
+		spell_slots_json TEXT,
+		max_hp INTEGER
 	);`
 
-	_, err := db.Exec(createTableSQL)
-	if err != nil {
-		log.Fatalf("failed to create characters table: %v", err)
+	if _, err := db.Exec(createTableSQL); err != nil {
+		log.Fatalf("❌ Failed to create characters table: %v", err)
 	}
 
 	return repo
 }
 
-// AddCharacter stores a Character struct into SQLite using JSON for nested structs
+// AddCharacter stores a Character struct into SQLite using JSON for nested structs.
 func (r *SQLiteCharacterRepository) AddCharacter(character domain.Character) error {
-	// Marshal nested structs to JSON
+	classJSON, err := json.Marshal(character.Class)
+	if err != nil {
+		return err
+	}
+
 	abilityJSON, err := json.Marshal(character.AbilityScores)
 	if err != nil {
 		return err
@@ -63,43 +67,46 @@ func (r *SQLiteCharacterRepository) AddCharacter(character domain.Character) err
 		return err
 	}
 
-	// Insert into SQLite
 	_, err = r.DB.Exec(`
 		INSERT INTO characters 
-			(id, name, race, class, level, background, proficiency_bonus, ability_scores_json, skills_json, equipment_json, spell_slots_json)
-		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+			(id, name, race, class, level, background, proficiency_bonus,
+			 ability_scores_json, skills_json, equipment_json, spell_slots_json, max_hp)
+		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
 		character.Id,
 		character.Name,
-		character.Race.Name, // assuming Race and Class have Id fields
-		character.Class.Name,
+		character.Race.Name,
+		string(classJSON),
 		character.Level,
 		character.Background,
 		character.ProficiencyBonus,
+		character.MaxHP,
 		string(abilityJSON),
 		string(skillsJSON),
 		string(equipmentJSON),
 		string(spellSlotsJSON),
 	)
-
 	return err
 }
 
-// Optional: Retrieve Character by ID
+// GetCharacterByID retrieves a character from the database by ID.
 func (r *SQLiteCharacterRepository) GetCharacterByID(id string) (domain.Character, error) {
 	var c domain.Character
-	var abilityJSON, skillsJSON, equipmentJSON, spellbookJSON string
+	var classJSON, abilityJSON, skillsJSON, equipmentJSON, spellbookJSON string
+
 	row := r.DB.QueryRow(`
-		SELECT id, name, race, class, level, background, proficiency_bonus, ability_scores_json, skills_json, equipment_json, spell_slots_json
+		SELECT id, name, race, class, level, background, proficiency_bonus,
+		       ability_scores_json, skills_json, equipment_json, spell_slots_json, max_hp
 		FROM characters WHERE id=?`, id)
 
 	err := row.Scan(
 		&c.Id,
 		&c.Name,
 		&c.Race.Name,
-		&c.Class.Name,
+		&classJSON,
 		&c.Level,
 		&c.Background,
 		&c.ProficiencyBonus,
+		&c.MaxHP,
 		&abilityJSON,
 		&skillsJSON,
 		&equipmentJSON,
@@ -112,7 +119,10 @@ func (r *SQLiteCharacterRepository) GetCharacterByID(id string) (domain.Characte
 		return c, err
 	}
 
-	// Unmarshal JSON back into structs
+	// Unmarshal JSON fields
+	if err := json.Unmarshal([]byte(classJSON), &c.Class); err != nil {
+		log.Printf("⚠️ Failed to unmarshal class JSON for %s: %v", c.Name, err)
+	}
 	json.Unmarshal([]byte(abilityJSON), &c.AbilityScores)
 	json.Unmarshal([]byte(skillsJSON), &c.Skills)
 	json.Unmarshal([]byte(equipmentJSON), &c.Equipment)
@@ -121,10 +131,11 @@ func (r *SQLiteCharacterRepository) GetCharacterByID(id string) (domain.Characte
 	return c, nil
 }
 
+// ListCharacters returns all characters in the database.
 func (r *SQLiteCharacterRepository) ListCharacters() ([]domain.Character, error) {
 	rows, err := r.DB.Query(`
 		SELECT id, name, race, class, level, background, proficiency_bonus,
-		       ability_scores_json, skills_json, equipment_json, spell_slots_json
+		       ability_scores_json, skills_json, equipment_json, spell_slots_json, max_hp
 		FROM characters`)
 	if err != nil {
 		return nil, err
@@ -135,17 +146,18 @@ func (r *SQLiteCharacterRepository) ListCharacters() ([]domain.Character, error)
 
 	for rows.Next() {
 		var c domain.Character
-		var raceName, className string
-		var abilityJSON, skillsJSON, equipmentJSON, spellbookJSON string
+		var raceName string
+		var classJSON, abilityJSON, skillsJSON, equipmentJSON, spellbookJSON string
 
 		if err := rows.Scan(
 			&c.Id,
 			&c.Name,
 			&raceName,
-			&className,
+			&classJSON,
 			&c.Level,
 			&c.Background,
 			&c.ProficiencyBonus,
+			&c.MaxHP,
 			&abilityJSON,
 			&skillsJSON,
 			&equipmentJSON,
@@ -155,20 +167,14 @@ func (r *SQLiteCharacterRepository) ListCharacters() ([]domain.Character, error)
 		}
 
 		c.Race = domain.Race{Name: raceName}
-		c.Class = domain.Class{Name: className}
+		if err := json.Unmarshal([]byte(classJSON), &c.Class); err != nil {
+			log.Printf("⚠️ Failed to parse class JSON for %s: %v", c.Name, err)
+		}
 
-		if err := json.Unmarshal([]byte(abilityJSON), &c.AbilityScores); err != nil {
-			log.Printf("Warning: failed to parse ability scores for %s: %v", c.Name, err)
-		}
-		if err := json.Unmarshal([]byte(skillsJSON), &c.Skills); err != nil {
-			log.Printf("Warning: failed to parse skills for %s: %v", c.Name, err)
-		}
-		if err := json.Unmarshal([]byte(equipmentJSON), &c.Equipment); err != nil {
-			log.Printf("Warning: failed to parse equipment for %s: %v", c.Name, err)
-		}
-		if err := json.Unmarshal([]byte(spellbookJSON), &c.Spellbook); err != nil {
-			log.Printf("Warning: failed to parse spellbook for %s: %v", c.Name, err)
-		}
+		json.Unmarshal([]byte(abilityJSON), &c.AbilityScores)
+		json.Unmarshal([]byte(skillsJSON), &c.Skills)
+		json.Unmarshal([]byte(equipmentJSON), &c.Equipment)
+		json.Unmarshal([]byte(spellbookJSON), &c.Spellbook)
 
 		characters = append(characters, c)
 	}
@@ -180,14 +186,12 @@ func (r *SQLiteCharacterRepository) ListCharacters() ([]domain.Character, error)
 	return characters, nil
 }
 
-
-// DeleteCharacter removes a Character by ID
+// DeleteCharacter removes a Character by ID.
 func (r *SQLiteCharacterRepository) DeleteCharacter(id string) error {
 	result, err := r.DB.Exec("DELETE FROM characters WHERE id=?", id)
 	if err != nil {
 		return err
 	}
-
 	affected, _ := result.RowsAffected()
 	if affected == 0 {
 		return errors.New("character not found")
@@ -195,13 +199,15 @@ func (r *SQLiteCharacterRepository) DeleteCharacter(id string) error {
 	return nil
 }
 
+// UpdateCharacter updates an existing character record.
 func (r *SQLiteCharacterRepository) UpdateCharacter(character domain.Character) error {
-    abilityJSON, _ := json.Marshal(character.AbilityScores)
-    skillsJSON, _ := json.Marshal(character.Skills)
-    equipmentJSON, _ := json.Marshal(character.Equipment)
-    spellSlotsJSON, _ := json.Marshal(character.Spellbook)
+	classJSON, _ := json.Marshal(character.Class)
+	abilityJSON, _ := json.Marshal(character.AbilityScores)
+	skillsJSON, _ := json.Marshal(character.Skills)
+	equipmentJSON, _ := json.Marshal(character.Equipment)
+	spellSlotsJSON, _ := json.Marshal(character.Spellbook)
 
-    _, err := r.DB.Exec(`
+	_, err := r.DB.Exec(`
         UPDATE characters SET 
             name = ?, 
             race = ?, 
@@ -212,20 +218,21 @@ func (r *SQLiteCharacterRepository) UpdateCharacter(character domain.Character) 
             ability_scores_json = ?, 
             skills_json = ?, 
             equipment_json = ?, 
-            spell_slots_json = ?
+            spell_slots_json = ?,
+			max_hp = ?
         WHERE id = ?`,
-        character.Name,
-        character.Race.Name,
-        character.Class.Name,
-        character.Level,
-        character.Background,
-        character.ProficiencyBonus,
-        string(abilityJSON),
-        string(skillsJSON),
-        string(equipmentJSON),
-        string(spellSlotsJSON),
-        character.Id,
-    )
-    return err
+		character.Name,
+		character.Race.Name,
+		string(classJSON),
+		character.Level,
+		character.Background,
+		character.ProficiencyBonus,
+		character.MaxHP,
+		string(abilityJSON),
+		string(skillsJSON),
+		string(equipmentJSON),
+		string(spellSlotsJSON),
+		character.Id,
+	)
+	return err
 }
-

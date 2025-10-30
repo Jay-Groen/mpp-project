@@ -30,9 +30,12 @@ func HandleTestCommand(app *presentation.App, races []domain.Race, classes []dom
 func RunTestScenario(app *presentation.App, char *domain.Character, races []domain.Race, classes []domain.Class, spells []domain.Spell, equipment []domain.Equipment) {
 	fmt.Println("🧪 Running test scenario...")
 
-	c := presentation.FindCharacterByName(app, "Luigi")
+	c := presentation.FindCharacterByName(app, "funnybrie")
 
-	fmt.Print(c.Spellbook.SpellSlots)
+	fmt.Println(c.Name)
+	fmt.Println(c.Class)
+	fmt.Println(c.Class.HitDie)
+	fmt.Println(c.MaxHP)
 
 	// fmt.Println(characters)
 	// fmt.Println(races)

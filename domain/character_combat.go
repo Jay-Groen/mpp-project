@@ -1,6 +1,9 @@
 package domain
 
-import "strings"
+import (
+	"math"
+	"strings"
+)
 
 func (c *Character) ArmorClass() int {
 	dexMod := c.AbilityScores.Dexterity.Modifier
@@ -86,4 +89,46 @@ func (c *Character) PassivePerception() int {
 		perception += c.ProficiencyBonus
 	}
 	return perception
+}
+
+// Fixed average per hit die
+var hitDieAverage = map[string]int{
+	"1d12": 7,
+	"1d10": 6,
+	"1d8":  5,
+	"1d6":  4,
+}
+
+// Max values per hit die
+var hitDieMax = map[string]int{
+	"1d12": 12,
+	"1d10": 10,
+	"1d8":  8,
+	"1d6":  6,
+}
+
+// CalculateConModifier returns floor((CON - 10) / 2)
+func CalculateConModifier(con int) int {
+	return int(math.Floor(float64(con-10) / 2.0))
+}
+
+// CalculateMaxHP computes max HP according to fixed averages
+func CalculateMaxHP(hitDie string, level int, con int) int {
+	conMod := CalculateConModifier(con)
+
+	max := hitDieMax[hitDie]
+	avg := hitDieAverage[hitDie]
+
+	if level <= 0 {
+		return 0
+	}
+
+	// Level 1 gets max die, others get average
+	hp := (max + conMod) + ((avg + conMod) * (level - 1))
+
+	if hp < 1 {
+		hp = 1 // HP can’t be less than 1
+	}
+
+	return hp
 }

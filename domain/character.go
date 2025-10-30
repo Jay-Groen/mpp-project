@@ -12,6 +12,7 @@ type Character struct {
 	Skills           Skills        `json:"skills"`
 	Equipment        Equipment     `json:"equipment"`
 	Spellbook        Spellbook     `json:"spellbook"`
+	MaxHP            int           `json:"max_hp"`
 }
 
 // StandardArray is the fixed array of ability scores for character creation

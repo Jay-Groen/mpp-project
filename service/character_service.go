@@ -89,6 +89,10 @@ func (s *CharacterService) CreateCharacter(
 		Charisma:     domain.AbilityScore{Name: domain.Charisma, Score: cha},
 	}
 
+	// Calculate and set MaxHP
+	hitDie := char.Class.HitDie
+	char.MaxHP = domain.CalculateMaxHP(hitDie, level, char.AbilityScores.Constitution.Score)
+
 	// Apply racial bonuses and choices
 	char.Race.ApplyBonuses(&char.AbilityScores)
 	char.Race.HandleChoice(&char.AbilityScores, chosenAbilities)
@@ -119,13 +123,14 @@ func (s *CharacterService) CreateCharacter(
 	// Initialize spell slots
 	char.Spellbook = domain.NewEmptySpellSlots(char.Level, char.Class.CasterProgression)
 
-	// Persist the character using the repository
+	// Persist the character
 	err := s.repo.AddCharacter(char)
 	if err != nil {
 		return domain.Character{}, err
 	}
 
 	return char, nil
+
 }
 
 func (s *CharacterService) UpdateSpellSlots(char *domain.Character) {
@@ -144,5 +149,13 @@ func (s *CharacterService) UpdateLevel(level int, c *domain.Character) error {
 
 	s.UpdateSpellSlots(c)
 
+	s.UpdateMaxHP(c)
+
 	return nil
+}
+
+func (s *CharacterService) UpdateMaxHP(c *domain.Character) {
+	hitDie := c.Class.HitDie // e.g. "1d10"
+	con := c.AbilityScores.Constitution.Modifier
+	c.MaxHP = domain.CalculateMaxHP(hitDie, c.Level, con)
 }

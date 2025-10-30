@@ -303,7 +303,7 @@
           <div class="hp">
             <div class="regular">
               <div class="max">
-                <label for="maxhp">Hit Point Maximum</label><input name="maxhp" placeholder="10" type="text" />
+                <label for="maxhp">Hit Point Maximum</label><input name="maxhp" placeholder="10" type="text" value="{{.MaxHP}}" />
               </div>
               <div class="current">
                 <label for="currenthp">Current Hit Points</label><input name="currenthp" type="text" />
@@ -317,7 +317,7 @@
             <div>
               <div class="total">
                 <label onclick="totalhd_clicked()" for="totalhd">Total</label><input name="totalhd" placeholder="2d10"
-                  type="text" />
+                  type="text" value="{{.Class.HitDie}}"/>
               </div>
               <div class="remaining">
                 <label for="remaininghd">Hit Dice</label><input name="remaininghd" type="text" />

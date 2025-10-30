@@ -54,5 +54,19 @@ func (r *CSVClassRepository) LoadClasses() ([]domain.Class, error) {
 		})
 	}
 
+	for i := range classes {
+		switch strings.ToLower(classes[i].Name) {
+		case "barbarian":
+			classes[i].HitDie = "1d12"
+		case "fighter", "paladin", "ranger":
+			classes[i].HitDie = "1d10"
+		case "bard", "cleric", "druid", "monk", "rogue", "warlock":
+			classes[i].HitDie = "1d8"
+		case "sorcerer", "wizard":
+			classes[i].HitDie = "1d6"
+		default:
+			classes[i].HitDie = "1d8" // safe default
+		}
+	}
 	return classes, nil
 }

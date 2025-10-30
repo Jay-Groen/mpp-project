@@ -6,6 +6,7 @@ type Class struct {
 	SkillProficienciesAmount int      `json:"skillproficienciesamount"`
 	SpellcastingType         string   `json:"spellcasting_type"`
 	CasterProgression        string   `json:"caster_progression"`
+	HitDie                   string   `json:"hit_die"`
 }
 
 // ApplySkillProficiencies applies the first N skill proficiencies from the class
