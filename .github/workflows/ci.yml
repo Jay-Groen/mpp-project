@@ -24,11 +24,11 @@ jobs:
       - name: Show Go version
         run: go version
 
-      - name: Install golangci-lint
+      - name: Run golangci-lint
         uses: golangci/golangci-lint-action@v6
         with:
-          version: latest
-          args: --version
+          version: v2.2.2
+          args: --timeout=5m -v
 
       - name: Run vet
         run: go vet ./...
