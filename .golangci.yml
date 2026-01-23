@@ -1,39 +1,40 @@
+version: "2"
 run:
-  timeout: 5m
   tests: true
-
 linters:
   enable:
-    - govet
-    - staticcheck
-    - errcheck
-    - ineffassign
-    - gosimple
-    - typecheck
-    - unused
-    - revive
     - gocritic
     - gocyclo
     - misspell
+    - revive
     - unconvert
     - unparam
-
-linters-settings:
-  gocyclo:
-    min-complexity: 15
-  revive:
+  settings:
+    gocyclo:
+      min-complexity: 15
+    revive:
+      rules:
+        - name: var-naming
+        - name: blank-imports
+        - name: empty-lines
+        - name: increment-decrement
+        - name: indent-error-flow
+        - name: early-return
+        - name: range
+  exclusions:
+    generated: lax
     rules:
-      - name: var-naming
-      - name: blank-imports
-      - name: empty-lines
-      - name: increment-decrement
-      - name: indent-error-flow
-      - name: early-return
-      - name: range
-
-issues:
-  exclude-use-default: false
-  exclude-rules:
-    - path: _test\.go
-      linters:
-        - gocyclo
+      - linters:
+          - gocyclo
+        path: _test\.go
+    paths:
+      - third_party$
+      - builtin$
+      - examples$
+formatters:
+  exclusions:
+    generated: lax
+    paths:
+      - third_party$
+      - builtin$
+      - examples$
