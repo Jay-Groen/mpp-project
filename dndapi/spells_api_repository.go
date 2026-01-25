@@ -25,7 +25,9 @@ func (r *ApiSpellRepository) FetchSpell(name string) (domain.Spell, error) {
 	if err != nil {
 		return domain.Spell{}, err
 	}
-	defer resp.Body.Close()
+	defer func() {
+		_ = resp.Body.Close()
+	}()
 
 	if resp.StatusCode != 200 {
 		return domain.Spell{}, fmt.Errorf("API returned status %d for spell %q", resp.StatusCode, name)

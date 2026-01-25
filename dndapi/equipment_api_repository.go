@@ -24,7 +24,9 @@ func (r *ApiEquipmentRepository) FetchEquipment(name string) (domain.EquipmentSp
 	if err != nil {
 		return domain.EquipmentSpecific{}, err
 	}
-	defer resp.Body.Close()
+	defer func() {
+		_ = resp.Body.Close()
+	}()
 
 	if resp.StatusCode != 200 {
 		return domain.EquipmentSpecific{}, fmt.Errorf("API returned status %d", resp.StatusCode)

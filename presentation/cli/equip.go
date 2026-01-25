@@ -17,7 +17,11 @@ func HandleEquipCommand(app *presentation.App) {
 	slot := flagSet.String("slot", "", "Slot for weapon: 'main hand' or 'off hand'")
 	armor := flagSet.String("armor", "", "Armor to equip")
 	shield := flagSet.String("shield", "", "Shield to equip")
-	flagSet.Parse(os.Args[2:])
+
+	if err := flagSet.Parse(os.Args[2:]); err != nil {
+		fmt.Println(err)
+		return
+	}
 
 	presentation.ValidateRequired(map[string]*string{
 		"name": name,

@@ -10,7 +10,11 @@ import (
 func HandleDeleteCommand(app *presentation.App) {
 	flagSet := flag.NewFlagSet("delete", flag.ExitOnError)
 	name := flagSet.String("name", "", "Character name")
-	flagSet.Parse(os.Args[2:])
+
+	if err := flagSet.Parse(os.Args[2:]); err != nil {
+		fmt.Println(err)
+		return
+	}
 
 	presentation.ValidateRequired(map[string]*string{
 		"name": name,

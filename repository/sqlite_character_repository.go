@@ -123,10 +123,22 @@ func (r *SQLiteCharacterRepository) GetCharacterByID(id string) (domain.Characte
 	if err := json.Unmarshal([]byte(classJSON), &c.Class); err != nil {
 		log.Printf("⚠️ Failed to unmarshal class JSON for %s: %v", c.Name, err)
 	}
-	json.Unmarshal([]byte(abilityJSON), &c.AbilityScores)
-	json.Unmarshal([]byte(skillsJSON), &c.Skills)
-	json.Unmarshal([]byte(equipmentJSON), &c.Equipment)
-	json.Unmarshal([]byte(spellbookJSON), &c.Spellbook)
+
+	if err := json.Unmarshal([]byte(abilityJSON), &c.AbilityScores); err != nil {
+		return domain.Character{}, err
+	}
+
+	if err := json.Unmarshal([]byte(skillsJSON), &c.Skills); err != nil {
+		return domain.Character{}, err
+	}
+
+	if err := json.Unmarshal([]byte(equipmentJSON), &c.Equipment); err != nil {
+		return domain.Character{}, err
+	}
+
+	if err := json.Unmarshal([]byte(spellbookJSON), &c.Spellbook); err != nil {
+		return domain.Character{}, err
+	}
 
 	return c, nil
 }
@@ -140,7 +152,10 @@ func (r *SQLiteCharacterRepository) ListCharacters() ([]domain.Character, error)
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
+
+	defer func() {
+		_ = rows.Close()
+	}()
 
 	var characters []domain.Character
 

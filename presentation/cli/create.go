@@ -23,7 +23,10 @@ func CreateHandler(app *presentation.App, classes []domain.Class, races []domain
 	wis := flagSet.Int("wis", 12, "Wisdom score")
 	cha := flagSet.Int("cha", 14, "Charisma score")
 
-	flagSet.Parse(os.Args[2:])
+	if err := flagSet.Parse(os.Args[2:]); err != nil {
+		fmt.Println(err)
+		return
+	}
 
 	presentation.ValidateRequired(map[string]*string{
 		"name":  name,

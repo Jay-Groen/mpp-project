@@ -16,7 +16,9 @@ func main() {
 
 	classes, races, spells, equipment := presentation.LoadData(*app)
 
-	defer db.Close()
+	defer func() {
+		_ = db.Close()
+	}()
 
 	if len(os.Args) < 2 {
 		fmt.Println("Usage: go run . <command> [flags]")

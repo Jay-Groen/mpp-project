@@ -22,7 +22,7 @@ func NewEquipmentRepository(csvPath string) *EquipmentRepository {
 }
 
 // Load reads all equipment data from the CSV file into memory.
-func (r *EquipmentRepository) LoadEquipment() ([]domain.Equipment ,error) {
+func (r *EquipmentRepository) LoadEquipment() ([]domain.Equipment, error) {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
@@ -30,7 +30,9 @@ func (r *EquipmentRepository) LoadEquipment() ([]domain.Equipment ,error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to open equipment CSV: %w", err)
 	}
-	defer file.Close()
+	defer func() {
+		_ = file.Close()
+	}()
 
 	reader := csv.NewReader(file)
 	records, err := reader.ReadAll()

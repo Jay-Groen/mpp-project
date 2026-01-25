@@ -14,7 +14,9 @@ import (
 func main() {
 	app, db := presentation.InitializeApp()
 
-	defer db.Close()
+	defer func() {
+		_ = db.Close()
+	}()
 
 	tmpl := template.Must(template.ParseGlob(filepath.Join("./presentation/web", "*.html")))
 
@@ -76,7 +78,9 @@ func main() {
 		}
 
 		// Merge filled slots first, then empty
-		c.Spellbook.SpellSlots = append(filled, empty...)
+		// c.Spellbook.SpellSlots = append(filled, empty...)
+		filled = append(filled, empty...)
+		c.Spellbook.SpellSlots = filled
 
 		// 🧾 Render the character sheet with enriched info
 		if err := tmpl.ExecuteTemplate(w, "charactersheet.html", &c); err != nil {
