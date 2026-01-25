@@ -63,6 +63,9 @@ func main() {
 	default:
 		fmt.Printf("Unknown command: %s\n", cmd)
 		fmt.Println("Available commands: create, view, delete, equip, prepare-spell, learn-spell, test, html")
-		os.Exit(1)
+		if len(os.Args) < 2 {
+			fmt.Println("Usage: ...")
+			return
+		}
 	}
 }

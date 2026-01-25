@@ -51,7 +51,6 @@ func (s *CharacterService) CreateCharacter(
 	wis int,
 	cha int,
 ) (domain.Character, error) {
-
 	if name == "" {
 		return domain.Character{}, errors.New("name cannot be empty")
 	}
