@@ -2,6 +2,7 @@ package cli
 
 import (
 	"flag"
+	"fmt"
 	"herkansing/onion/domain"
 	"herkansing/onion/presentation"
 	"os"
@@ -10,7 +11,11 @@ import (
 func HandleViewCommand(app *presentation.App, classes []domain.Class) {
 	flagSet := flag.NewFlagSet("view", flag.ExitOnError)
 	name := flagSet.String("name", "", "Character name")
-	flagSet.Parse(os.Args[2:])
+
+	if err := flagSet.Parse(os.Args[2:]); err != nil {
+		fmt.Println(err)
+		return
+	}
 
 	presentation.ValidateRequired(map[string]*string{
 		"name": name,

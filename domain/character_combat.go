@@ -27,15 +27,15 @@ func (c *Character) ArmorClass() int {
 
 		// --- Medium Armor ---
 		case strings.Contains(armorName, "hide"):
-			ac = 12 + min(dexMod, 2)
+			ac = 12 + min(dexMod)
 		case strings.Contains(armorName, "chain shirt"):
-			ac = 13 + min(dexMod, 2)
+			ac = 13 + min(dexMod)
 		case strings.Contains(armorName, "scale mail"):
-			ac = 14 + min(dexMod, 2)
+			ac = 14 + min(dexMod)
 		case strings.Contains(armorName, "breastplate"):
-			ac = 14 + min(dexMod, 2)
+			ac = 14 + min(dexMod)
 		case strings.Contains(armorName, "half plate"):
-			ac = 15 + min(dexMod, 2)
+			ac = 15 + min(dexMod)
 
 		// --- Heavy Armor ---
 		case strings.Contains(armorName, "ring mail"):
@@ -72,11 +72,11 @@ func (c *Character) ArmorClass() int {
 }
 
 // Helper
-func min(a, b int) int {
-	if a < b {
+func min(a int) int {
+	if a < 2 {
 		return a
 	}
-	return b
+	return 2
 }
 
 func (c *Character) Initiative() int {

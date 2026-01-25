@@ -56,7 +56,8 @@ func main() {
 		cmd.Stdout = os.Stdout
 		cmd.Stderr = os.Stderr
 		if err := cmd.Run(); err != nil {
-			log.Fatalf("Failed to run web.go: %v", err)
+			log.Printf("Failed to run web.go: %v", err)
+			return
 		}
 
 	default:
@@ -64,5 +65,4 @@ func main() {
 		fmt.Println("Available commands: create, view, delete, equip, prepare-spell, learn-spell, test, html")
 		os.Exit(1)
 	}
-
 }

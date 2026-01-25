@@ -130,7 +130,6 @@ func (s *CharacterService) CreateCharacter(
 	}
 
 	return char, nil
-
 }
 
 func (s *CharacterService) UpdateSpellSlots(char *domain.Character) {

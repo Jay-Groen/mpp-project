@@ -71,7 +71,6 @@ func SpellSlotsByLevel(level int, casterProgression string) [9]int {
 	casterProgression = strings.ToLower(casterProgression)
 
 	switch casterProgression {
-
 	// --- FULL CASTERS (Wizard, Cleric, etc.) ---
 	case "full":
 		effectiveLevel := level

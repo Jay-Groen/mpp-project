@@ -34,7 +34,6 @@ func main() {
 			http.Error(w, "Template error", http.StatusInternalServerError)
 			return
 		}
-
 	})
 
 	http.HandleFunc("/character", func(w http.ResponseWriter, r *http.Request) {
