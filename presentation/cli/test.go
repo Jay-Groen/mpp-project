@@ -11,7 +11,11 @@ import (
 func HandleTestCommand(app *presentation.App, races []domain.Race, classes []domain.Class, spells []domain.Spell, equipment []domain.Equipment) {
 	flagSet := flag.NewFlagSet("test", flag.ExitOnError)
 	name := flagSet.String("name", "", "Character name (optional, for character-based tests)")
-	flagSet.Parse(os.Args[2:])
+
+	if err := flagSet.Parse(os.Args[2:]); err != nil {
+		fmt.Println(err)
+		return
+	}
 
 	// Optional: If a name is given, load the character
 	var char *domain.Character

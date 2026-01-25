@@ -30,7 +30,7 @@ func FindCharacterByName(app *App, name string) domain.Character {
 
 	for _, c := range chars {
 		if strings.EqualFold(c.Name, name) {
-			char, err := app.CharacterService.GetCharacterByID(c.Id)
+			char, err := app.CharacterService.GetCharacterByID(c.ID)
 			if err != nil {
 				log.Fatalf("❌ Failed to get character details: %v", err)
 			}
@@ -121,10 +121,10 @@ func InitializeApp() (*App, *sql.DB) {
 	// Initialize repository
 	charRepo := repository.NewSQLiteCharacterRepository(db)
 
-	spellAPIRepo := &dndapi.ApiSpellRepository{}
+	spellAPIRepo := &dndapi.APISpellRepository{}
 	spellCSVRepo := repository.NewCSVSpellRepository("./data/5e-SRD-Spells.csv")
 
-	equipmentAPIRepo := &dndapi.ApiEquipmentRepository{}
+	equipmentAPIRepo := &dndapi.APIEquipmentRepository{}
 	equipmentCSVRepo := repository.NewEquipmentRepository("./data/5e-SRD-Equipment.csv")
 
 	classRepo := repository.NewCSVClassRepository("./data/classes.csv")

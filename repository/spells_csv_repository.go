@@ -24,7 +24,10 @@ func (r *CSVSpellRepository) LoadSpells() ([]domain.Spell, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer file.Close()
+
+	defer func() {
+		_ = file.Close()
+	}()
 
 	reader := csv.NewReader(file)
 	records, err := reader.ReadAll()

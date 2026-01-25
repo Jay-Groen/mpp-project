@@ -72,7 +72,7 @@ func (r *SQLiteCharacterRepository) AddCharacter(character domain.Character) err
 			(id, name, race, class, level, background, proficiency_bonus,
 			 ability_scores_json, skills_json, equipment_json, spell_slots_json, max_hp)
 		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-		character.Id,
+		character.ID,
 		character.Name,
 		character.Race.Name,
 		string(classJSON),
@@ -99,7 +99,7 @@ func (r *SQLiteCharacterRepository) GetCharacterByID(id string) (domain.Characte
 		FROM characters WHERE id=?`, id)
 
 	err := row.Scan(
-		&c.Id,
+		&c.ID,
 		&c.Name,
 		&c.Race.Name,
 		&classJSON,
@@ -165,7 +165,7 @@ func (r *SQLiteCharacterRepository) ListCharacters() ([]domain.Character, error)
 		var classJSON, abilityJSON, skillsJSON, equipmentJSON, spellbookJSON string
 
 		if err := rows.Scan(
-			&c.Id,
+			&c.ID,
 			&c.Name,
 			&raceName,
 			&classJSON,
@@ -186,10 +186,26 @@ func (r *SQLiteCharacterRepository) ListCharacters() ([]domain.Character, error)
 			log.Printf("⚠️ Failed to parse class JSON for %s: %v", c.Name, err)
 		}
 
-		json.Unmarshal([]byte(abilityJSON), &c.AbilityScores)
-		json.Unmarshal([]byte(skillsJSON), &c.Skills)
-		json.Unmarshal([]byte(equipmentJSON), &c.Equipment)
-		json.Unmarshal([]byte(spellbookJSON), &c.Spellbook)
+		// json.Unmarshal([]byte(abilityJSON), &c.AbilityScores)
+		// json.Unmarshal([]byte(skillsJSON), &c.Skills)
+		// json.Unmarshal([]byte(equipmentJSON), &c.Equipment)
+		// json.Unmarshal([]byte(spellbookJSON), &c.Spellbook)
+
+		if err := json.Unmarshal([]byte(abilityJSON), &c.AbilityScores); err != nil {
+			return nil, err
+		}
+
+		if err := json.Unmarshal([]byte(skillsJSON), &c.Skills); err != nil {
+			return nil, err
+		}
+
+		if err := json.Unmarshal([]byte(equipmentJSON), &c.Equipment); err != nil {
+			return nil, err
+		}
+
+		if err := json.Unmarshal([]byte(spellbookJSON), &c.Spellbook); err != nil {
+			return nil, err
+		}
 
 		characters = append(characters, c)
 	}
@@ -247,7 +263,7 @@ func (r *SQLiteCharacterRepository) UpdateCharacter(character domain.Character) 
 		string(skillsJSON),
 		string(equipmentJSON),
 		string(spellSlotsJSON),
-		character.Id,
+		character.ID,
 	)
 	return err
 }

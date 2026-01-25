@@ -8,12 +8,12 @@ import (
 	"sync"
 )
 
-var _ domain.SpellAPIFetcher = (*ApiSpellRepository)(nil)
+var _ domain.SpellAPIFetcher = (*APISpellRepository)(nil)
 
-type ApiSpellRepository struct{}
+type APISpellRepository struct{}
 
 // FetchSpell fetches a spell from the D&D API by its normal name
-func (r *ApiSpellRepository) FetchSpell(name string) (domain.Spell, error) {
+func (r *APISpellRepository) FetchSpell(name string) (domain.Spell, error) {
 	if name == "" {
 		return domain.Spell{}, fmt.Errorf("spell name cannot be empty")
 	}
@@ -43,7 +43,7 @@ func (r *ApiSpellRepository) FetchSpell(name string) (domain.Spell, error) {
 }
 
 // FetchMultipleSpells fetches multiple spells concurrently using goroutines.
-func (r *ApiSpellRepository) FetchMultipleSpells(names []string) ([]domain.Spell, error) {
+func (r *APISpellRepository) FetchMultipleSpells(names []string) ([]domain.Spell, error) {
 	var wg sync.WaitGroup
 	var mu sync.Mutex
 	var spells []domain.Spell

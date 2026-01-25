@@ -13,7 +13,11 @@ func HandlePrepareSpellCommand(app *presentation.App, classes []domain.Class, sp
 	flagSet := flag.NewFlagSet("prepare-spell", flag.ExitOnError)
 	name := flagSet.String("name", "", "Character name (required)")
 	spellName := flagSet.String("spell", "", "Spell name to prepare (required)")
-	flagSet.Parse(os.Args[2:])
+
+	if err := flagSet.Parse(os.Args[2:]); err != nil {
+		fmt.Println(err)
+		return
+	}
 
 	presentation.ValidateRequired(map[string]*string{
 		"name":  name,

@@ -8,12 +8,12 @@ import (
 	"sync"
 )
 
-var _ domain.EquipmentAPIFetcher = (*ApiEquipmentRepository)(nil)
+var _ domain.EquipmentAPIFetcher = (*APIEquipmentRepository)(nil)
 
-type ApiEquipmentRepository struct{}
+type APIEquipmentRepository struct{}
 
 // Fetch equipment by index
-func (r *ApiEquipmentRepository) FetchEquipment(name string) (domain.EquipmentSpecific, error) {
+func (r *APIEquipmentRepository) FetchEquipment(name string) (domain.EquipmentSpecific, error) {
 	if name == "" {
 		return domain.EquipmentSpecific{}, fmt.Errorf("equipment name cannot be empty")
 	}
@@ -42,7 +42,7 @@ func (r *ApiEquipmentRepository) FetchEquipment(name string) (domain.EquipmentSp
 }
 
 // FetchMultipleEquipment fetches multiple equipment items concurrently using goroutines.
-func (r *ApiEquipmentRepository) FetchMultipleEquipment(names []string) ([]domain.EquipmentSpecific, error) {
+func (r *APIEquipmentRepository) FetchMultipleEquipment(names []string) ([]domain.EquipmentSpecific, error) {
 	var wg sync.WaitGroup
 	var mu sync.Mutex
 	var equipment []domain.EquipmentSpecific

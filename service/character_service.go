@@ -61,7 +61,7 @@ func (s *CharacterService) CreateCharacter(
 
 	// Initialize the character entity
 	char := domain.Character{
-		Id:         id,
+		ID:         id,
 		Name:       name,
 		Race:       race,
 		Class:      class,

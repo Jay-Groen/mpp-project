@@ -1,7 +1,7 @@
 package domain
 
 type Character struct {
-	Id               string        `json:"id"`
+	ID               string        `json:"id"`
 	Name             string        `json:"name"`
 	Race             Race          `json:"race"`
 	Class            Class         `json:"class"`

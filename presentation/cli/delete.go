@@ -26,7 +26,7 @@ func HandleDeleteCommand(app *presentation.App) {
 	selectedChar := presentation.FindCharacterByName(app, nameInput)
 
 	// 🗑️ Delete character
-	err := app.CharacterService.DeleteCharacter(selectedChar.Id)
+	err := app.CharacterService.DeleteCharacter(selectedChar.ID)
 	if err != nil {
 		fmt.Printf("❌ Failed to delete '%s': %v\n", selectedChar.Name, err)
 		os.Exit(1)
