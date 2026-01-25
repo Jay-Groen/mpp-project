@@ -21,7 +21,7 @@ func main() {
 	if len(os.Args) < 2 {
 		fmt.Println("Usage: go run . <command> [flags]")
 		fmt.Println("Available commands: create, view, delete, equip, prepare-spell, learn-spell, test, html")
-		os.Exit(1)
+		return
 	}
 
 	cmd := os.Args[1]
