@@ -54,7 +54,7 @@ body:
     id: estimate
     attributes:
       label: Schatting (in dagen of story points)
-      placeholder: Bijvoorbeeld: 2 dagen / 5 punten
+      placeholder: "Bijvoorbeeld: 2 dagen / 5 punten"
     validations:
       required: true
 
