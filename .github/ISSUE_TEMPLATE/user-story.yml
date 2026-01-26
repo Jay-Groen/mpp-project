@@ -1,0 +1,71 @@
+name: User Story
+description: Maak een nieuwe user story aan volgens het vaste formaat
+title: "[USER STORY]: "
+labels: ["user-story"]
+assignees: []
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## User Story
+        Vul onderstaande velden zo volledig mogelijk in.
+
+  - type: textarea
+    id: als
+    attributes:
+      label: Als...
+      description: Wie is de gebruiker/rol?
+      placeholder: Als [type gebruiker]
+    validations:
+      required: true
+
+  - type: textarea
+    id: wil-ik
+    attributes:
+      label: Wil ik...
+      description: Wat wil de gebruiker kunnen doen?
+      placeholder: Wil ik [functionaliteit]
+    validations:
+      required: true
+
+  - type: textarea
+    id: zodat
+    attributes:
+      label: Zodat...
+      description: Wat is het doel / de waarde?
+      placeholder: Zodat [doel/waarde]
+    validations:
+      required: true
+
+  - type: textarea
+    id: acceptatiecriteria
+    attributes:
+      label: Acceptatiecriteria (Given / When / Then)
+      description: Beschrijf hier de testbare acceptatiecriteria
+      placeholder: |
+        Gegeven dat ...
+        Wanneer ...
+        Dan ...
+    validations:
+      required: true
+
+  - type: input
+    id: estimate
+    attributes:
+      label: Schatting (in dagen of story points)
+      placeholder: Bijvoorbeeld: 2 dagen / 5 punten
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: definition-of-done
+    attributes:
+      label: Definition of Done
+      description: Vink alles aan voordat de story als "Done" wordt gemarkeerd
+      options:
+        - label: Code is geschreven
+        - label: Unit tests zijn toegevoegd
+        - label: Systeemtest is lokaal uitgevoerd
+        - label: Documentatie is bijgewerkt
+        - label: Acceptatietest met eindgebruiker uitgevoerd
