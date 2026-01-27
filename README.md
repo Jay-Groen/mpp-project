@@ -63,7 +63,7 @@ This ensures:
 
 ---
 
-### ▶ Run CLI
+### Run CLI
 
 ```bash
 go run . <command>
@@ -130,7 +130,7 @@ This ensures:
 
 ---
 
-## 🏷 Versioning & Releases
+## Versioning & Releases
 
 The project follows **Semantic Versioning**:
 
