@@ -1,0 +1,127 @@
+name: "Bug report"
+description: "Meld een bug zodat we het probleem kunnen reproduceren en oplossen"
+title: "[BUG]: "
+labels: ["bug"]
+assignees: []
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## Bug report
+        Vul dit zo volledig mogelijk in. Hoe beter de reproduceerbaarheid, hoe sneller de fix.
+
+  - type: textarea
+    id: summary
+    attributes:
+      label: "Korte omschrijving"
+      description: "Wat gaat er mis?"
+      placeholder: "Bijvoorbeeld: CLI crasht wanneer er geen characters bestaan."
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: "Stappen om te reproduceren"
+      description: "Welke stappen moet iemand volgen om de bug te zien?"
+      placeholder: |
+        1. Ga naar ...
+        2. Run command ...
+        3. Klik op ...
+        4. Zie error ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: "Verwacht gedrag"
+      description: "Wat had er moeten gebeuren?"
+      placeholder: "Bijvoorbeeld: lijst toont 'geen characters' in plaats van crash."
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: "Werkelijk gedrag"
+      description: "Wat gebeurt er nu?"
+      placeholder: "Bijvoorbeeld: panic: runtime error ..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: evidence
+    attributes:
+      label: "Bewijs (logs / screenshots / output)"
+      description: "Plak relevante output (stacktrace, logs, console output)."
+      placeholder: |
+        Plak hier logs/output.
+        Tip: gebruik code blocks (``` ... ```) voor leesbaarheid.
+    validations:
+      required: false
+
+  - type: dropdown
+    id: severity
+    attributes:
+      label: "Severity"
+      description: "Hoe ernstig is de bug?"
+      options:
+        - "Critical (crash / data loss)"
+        - "High (belangrijke functionaliteit stuk)"
+        - "Medium (workaround mogelijk)"
+        - "Low (cosmetisch / minor)"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: "Onderdeel"
+      description: "Waar zit het probleem vooral?"
+      options:
+        - "CLI"
+        - "HTML frontend"
+        - "Domeinlogica (characters/skills/stats)"
+        - "Equipment"
+        - "Spells"
+        - "External API integration"
+        - "CI / Pipeline"
+        - "Documentation"
+        - "Other"
+    validations:
+      required: true
+
+  - type: input
+    id: version
+    attributes:
+      label: "Versie / release tag"
+      description: "Op welke versie zie je dit? (bijv. v0.1.0 of commit SHA)"
+      placeholder: "v0.1.0"
+    validations:
+      required: false
+
+  - type: textarea
+    id: environment
+    attributes:
+      label: "Omgeving"
+      description: "OS, Go versie, en andere relevante info."
+      placeholder: |
+        OS: macOS/Linux/Windows
+        Go: go1.xx
+        Command: ...
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: definition-of-done
+    attributes:
+      label: "Definition of Done (voor fix)"
+      description: "Vink af wanneer de bug is opgelost."
+      options:
+        - label: "Reproducerende test toegevoegd of bestaande test aangepast"
+        - label: "Fix geïmplementeerd"
+        - label: "Alle tests lokaal groen"
+        - label: "CI pipeline groen"
+        - label: "Documentatie bijgewerkt (indien nodig)"
