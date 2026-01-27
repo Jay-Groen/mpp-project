@@ -5,7 +5,7 @@ The project supports both a **CLI interface** and an **HTML web interface**, and
 
 ---
 
-## 📦 Features
+## Features
 
 ### Character Management (CRU)
 - Create new characters
@@ -26,9 +26,7 @@ The project supports both a **CLI interface** and an **HTML web interface**, and
 - Spellcasting ability, spell save DC, and spell attack bonus
 
 ### Web Interface
-- Character dashboard (HTML frontend)
 - Individual character sheet view
-- Styled UI with CSS
 
 ### External API Integration
 - Enrichment of spells and equipment via:
@@ -38,7 +36,7 @@ The project supports both a **CLI interface** and an **HTML web interface**, and
 
 ---
 
-## 🏗 Architecture
+## Architecture
 
 The project follows an Onion Architecture approach:
 
@@ -57,7 +55,7 @@ This ensures:
 
 ---
 
-## 🚀 Running the Project
+## Running the Project
 
 ### Requirements
 - Go 1.21+
@@ -92,7 +90,7 @@ go run . create
 
 ---
 
-### 🌐 Run Web Interface (Locally)
+### Run Web Interface (Locally)
 
 ```bash
 go run . html
@@ -106,7 +104,7 @@ http://localhost:8081
 
 ---
 
-## 🧪 Running Tests
+## Running Tests
 
 Run all unit tests:
 
@@ -116,7 +114,7 @@ go test ./...
 
 ---
 
-## 🔎 CI Pipeline
+## CI Pipeline
 
 GitHub Actions automatically:
 
@@ -154,7 +152,7 @@ Each release includes:
 
 ---
 
-## 🔄 Hotfix & Rollback Strategy
+## Hotfix & Rollback Strategy
 
 ### Hotfix
 1. Bug is reported via GitHub Issue  
@@ -170,7 +168,7 @@ If a release is unstable:
 
 ---
 
-## 📘 Documentation
+## Documentation
 
 Documentation is updated for every release to support onboarding:
 
@@ -182,7 +180,7 @@ Documentation is updated for every release to support onboarding:
 
 ---
 
-## 🌍 Deployment
+## Deployment
 
 The web application can be deployed as a **Web Service** (e.g., on Render).
 
@@ -193,7 +191,7 @@ When deploying:
 
 ---
 
-## 👥 Development Workflow
+## Development Workflow
 
 1. Create user story or bug issue  
 2. Assign milestone  
@@ -203,9 +201,3 @@ When deploying:
 6. Tag release  
 7. Update documentation  
 8. Publish GitHub Release  
-
----
-
-## 📜 License
-
-Educational project developed for the MPP course.
