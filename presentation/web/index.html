@@ -1,69 +1,20 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link rel="stylesheet" href="./normalize.css" />
-  <link rel="stylesheet" href="./style.css" />
-  <link rel="stylesheet" href="./base.css" />
-  <title>Character Dashboard</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="normalize.css">
+    <link rel="stylesheet" href="style.css">
+    <title>Character List</title>
 </head>
-
 <body>
-  <header class="topbar">
-    <div class="container">
-      <div class="title-row">
-        <h1>Character Dashboard</h1>
-        <p class="subtitle">Browse your party and open any character sheet.</p>
-      </div>
-    </div>
-  </header>
-
-  <main class="container">
-    <section class="panel">
-      <div class="panel-head">
-        <h2>All Characters</h2>
-        <span class="badge">{{len .}} total</span>
-      </div>
-
-      {{if .}}
-      <ul class="card-grid">
+    <h1>All Characters</h1>
+    <ul>
         {{range .}}
-        <li class="card">
-          <a class="card-link" href="/character?id={{.ID}}">
-            <div class="card-body">
-              <div class="avatar" aria-hidden="true">
-                {{with .Name}}{{printf "%.1s" .}}{{end}}
-              </div>
-
-              <div class="meta">
-                <div class="name">{{.Name}}</div>
-
-                <div class="chips">
-                  <span class="chip">{{.Race}}</span>
-                  <span class="chip">{{.Class}}</span>
-                  <span class="chip chip-strong">Lvl {{.Level}}</span>
-                </div>
-
-                <div class="hint">Open character sheet →</div>
-              </div>
-            </div>
-          </a>
+        <li>
+            <a href="/character?id={{.ID}}">{{.Name}}</a>
         </li>
         {{end}}
-      </ul>
-      {{else}}
-      <div class="empty">
-        <div class="empty-icon" aria-hidden="true">🧙</div>
-        <h3>No characters yet</h3>
-        <p>Create a character using the CLI, then refresh this page.</p>
-      </div>
-      {{end}}
-    </section>
-  </main>
-
-  <footer class="footer container">
-    <small>MPP Project • Character Manager</small>
-  </footer>
+    </ul>
 </body>
 </html>
