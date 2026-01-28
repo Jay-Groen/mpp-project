@@ -174,20 +174,7 @@ Documentation is updated for every release to support onboarding:
 
 - `README.md` – Project overview & setup  
 - `CHANGELOG.md` – Version history  
-- `docs/development-setup.md`  
-- `docs/testing.md`  
-- `docs/releasing.md`  
-
----
-
-## Deployment
-
-The web application can be deployed as a **Web Service** (e.g., on Render).
-
-When deploying:
-- The application listens on the `PORT` environment variable  
-- Static files are served via `/static/`  
-- `/healthz` endpoint is available for monitoring  
+- `branching-model.md` - Branching model overview
 
 ---
 
