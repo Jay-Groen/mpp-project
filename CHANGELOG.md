@@ -1,5 +1,15 @@
 # Changelog
 
+## [v0.3.3] – 2026-01-28 – HOTFIX: Small change for hotfix demo
+Small change for hotfix demo, added hotfix at index.html footer.
+
+### Linked User Stories
+#19
+
+### What's Changed
+* Hotfix demo by @Jay-Groen in https://github.com/Jay-Groen/mpp-project/pull/20
+
+
 ## [v0.3.2] – 2026-01-28 – Character Dashboard and styling
 
 ### Implemented Features
@@ -17,7 +27,7 @@
  - #18 
  - #17 
 
-## What's Changed
+### What's Changed
 * Character dashboard by @Jay-Groen in https://github.com/Jay-Groen/mpp-project/pull/17
 * html styling by @Jay-Groen in https://github.com/Jay-Groen/mpp-project/pull/18
 
