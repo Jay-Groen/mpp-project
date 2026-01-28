@@ -1,46 +1,68 @@
+# Name of the workflow shown in GitHub Actions
 name: CI
 
+# When this workflow should run
 on:
+  # Run on every push to any branch
   push:
     branches: ["**"]
+
+  # Also run when a pull request is opened or updated
   pull_request:
 
+# Minimal permissions needed for this workflow
 permissions:
   contents: read
 
 jobs:
+  # Single job that builds, tests, lints and checks coverage
   build-test-lint:
+
+    # Use the latest Ubuntu runner provided by GitHub
     runs-on: ubuntu-latest
+
     steps:
+      # Clone the repository into the runner
       - name: Checkout
         uses: actions/checkout@v4
 
+      # Install Go using the version defined in go.mod
       - name: Set up Go
         uses: actions/setup-go@v5
         with:
+          # Automatically read Go version from go.mod
           go-version-file: go.mod
+
+          # Enable dependency caching for faster builds
           cache: true
 
+      # Print Go version and environment (debugging + transparency)
       - name: Show Go env
-        run: | 
+        run: |
           go version
           go env
 
+      # Run golangci-lint using pinned commit for reproducibility
       - name: Run golangci-lint
         uses: golangci/golangci-lint-action@9fae48acfc02a90574d7c304a1758ef9895495fa
         with:
+          # Use specific golangci-lint version
           version: v2.2.2
+
+          # Increase timeout and enable verbose output
           args: --timeout=10m -v
 
+      # Run Go's built-in static analysis tool
       - name: Run vet
         run: go vet ./...
 
+      # Run unit tests with race detector enabled
       - name: Run unit tests (with race)
         run: go test ./... -count=1 -race
 
-      - name: Run linter
-        run: golangci-lint run
-
+      # Enforce coverage requirements
+      # - Checks minimum coverage
+      # - Can compare against baseline for improvement per sprint
       - name: Coverage gate (minimum + baseline)
         run: |
           chmod +x scripts/coverage.sh scripts/coverage_gate.sh
