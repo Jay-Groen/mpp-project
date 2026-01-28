@@ -1,39 +1,96 @@
+# Use golangci-lint configuration schema version 2
 version: "2"
+
 run:
+  # Also analyze test files (_test.go)
   tests: true
+
 linters:
   enable:
+    # Detects suspicious constructs and logic issues (e.g., append misuse, exit after defer)
     - gocritic
+
+    # Measures cyclomatic complexity (number of decision paths in a function)
     - gocyclo
+
+    # Detects spelling mistakes in comments and strings
     - misspell
+
+    # Enforces coding style and best practices (replacement for golint)
     - revive
+
+    # Detects unnecessary type conversions
     - unconvert
+
+    # Detects unused function parameters
     - unparam
+
+    # Go’s official static analyzer (catches common bugs)
+    - govet
+
+    # Advanced static analysis (bug detection + simplifications)
+    - staticcheck
+
+    # Ensures returned errors are properly handled
+    - errcheck
+
+    # Detects ineffectual assignments (assigned but never used)
+    - ineffassign
+
+    # Detects unused variables, functions, constants, types
+    - unused
+
   settings:
     gocyclo:
+      # Only warn if function complexity exceeds 35
+      # (Higher value = more permissive)
       min-complexity: 35
+
     revive:
       rules:
+        # Enforces Go naming conventions (ID, API, etc.)
         - name: var-naming
+
+        # Warns about blank imports unless justified
         - name: blank-imports
+
+        # Disallows unnecessary empty lines at block boundaries
         - name: empty-lines
+
+        # Enforces proper use of ++ and --
         - name: increment-decrement
+
+        # Encourages reducing nested error handling
         - name: indent-error-flow
+
+        # Encourages returning early instead of deep nesting
         - name: early-return
+
+        # Enforces correct usage of for-range loops
         - name: range
+
   exclusions:
+    # Treat generated files leniently (reduce noise from auto-generated code)
     generated: lax
+
     rules:
+      # Ignore cyclomatic complexity checks in test files
       - linters:
           - gocyclo
         path: _test\.go
+
     paths:
+      # Ignore these directories completely
       - third_party$
       - builtin$
       - examples$
+
 formatters:
   exclusions:
+    # Also ignore generated files for formatting tools
     generated: lax
+
+    # Do not apply formatting rules to these directories
     paths:
       - third_party$
       - builtin$
