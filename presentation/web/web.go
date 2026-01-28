@@ -91,6 +91,7 @@ func main() {
 	// Serve CSS
 	http.Handle("/normalize.css", http.FileServer(http.Dir("./presentation/web")))
 	http.Handle("/style.css", http.FileServer(http.Dir("./presentation/web")))
+	http.Handle("/dashboard.css", http.FileServer(http.Dir("./presentation/web")))
 
 	log.Println("Server running at http://localhost:8081")
 
