@@ -1,45 +1,203 @@
-# mpp-project
+# MPP Project – D&D Character Manager
 
-## Burden of proof 5.1 (Bewijslast)
+A Go-based application for managing Dungeons & Dragons 5e characters.  
+The project supports both a **CLI interface** and an **HTML web interface**, and follows structured release management with CI, versioning, hotfixes, and rollback procedures.
 
-### Level 1 — Unit tests locally
-Run unit tests from your IDE or terminal:
+---
+
+## Features
+
+### Character Management (CRU)
+- Create new characters
+- View character sheets
+- Update level and proficiency bonus
+- Ability scores based on Standard Array (15/14/13/12/10/8) + race modifiers
+- Skill proficiency selection
+- Automatic skill modifier calculation
+
+### Equipment Management
+- Add weapons, armor, and shields
+- Enrich equipment data using the DnD 5e API
+- Combat stat calculations (Armor Class, Initiative, Passive Perception)
+
+### Spellcasting
+- Add learned/prepared spells
+- Spell slot management
+- Spellcasting ability, spell save DC, and spell attack bonus
+
+### Web Interface
+- Individual character sheet view
+
+### External API Integration
+- Enrichment of spells and equipment via:
+  https://www.dnd5eapi.co/
+- Uses Go concurrency for parallel API requests
+- Rate-limited to avoid excessive API usage
+
+---
+
+## Architecture
+
+The project follows an Onion Architecture approach:
+
+```
+domain/          → Core business logic  
+application/     → Use cases & services  
+infrastructure/  → Database & external API  
+presentation/    → CLI & Web interfaces  
+```
+
+This ensures:
+- Clear separation of concerns  
+- High testability  
+- Maintainability  
+- Structured layering  
+
+---
+
+## Running the Project
+
+### Requirements
+- Go 1.21+
+- SQLite (uses `github.com/mattn/go-sqlite3`)
+
+---
+
+### Run CLI
+
 ```bash
-make test
-# or
+go run . <command>
+```
+
+Available commands:
+
+```
+create
+view
+delete
+equip
+prepare-spell
+learn-spell
+test
+html
+```
+
+Example:
+
+```bash
+go run . create
+```
+
+---
+
+### Run Web Interface (Locally)
+
+```bash
+go run . html
+```
+
+Then open:
+
+```
+http://localhost:8081
+```
+
+---
+
+## Running Tests
+
+Run all unit tests:
+
+```bash
 go test ./...
 ```
 
-### Level 2 — Unit tests + linter in the development pipeline
-A GitHub Actions pipeline is included at `.github/workflows/ci.yml` that runs on every push/PR:
-- `go test ./... -race`
-- `golangci-lint run` (configured via `.golangci.yml`)
+---
 
-Run locally:
-```bash
-make ci
+## CI Pipeline
+
+GitHub Actions automatically:
+
+- Runs unit tests on every push
+- Runs golangci-lint
+- Performs static code analysis
+- Validates build before releases
+
+This ensures:
+- Stable releases
+- Consistent code quality
+- Continuous improvement of coverage
+
+---
+
+## Versioning & Releases
+
+The project follows **Semantic Versioning**:
+
+```
+MAJOR.MINOR.PATCH
 ```
 
-### Level 2+ — Advanced static analysis + metrics
-`golangci-lint` runs multiple analyzers that report code smells and complexity (e.g. `staticcheck`, `gocritic`, `revive`, `gocyclo`).
-Coverage metrics are produced with:
-```bash
-make coverage
-# optional HTML report:
-make coverage-html
-```
+Examples:
 
-### Level 3 — Coverage increases every sprint (proven by metric output)
-A coverage gate script compares the current total coverage against:
-- a minimum (`COVERAGE_MIN`, default 0), and
-- a baseline stored in `.coverage_baseline`.
+- `v0.2.0` → Feature release  
+- `v0.2.1` → Hotfix (patch) release  
+- `v0.3.0` → New feature release  
 
-In each sprint you can update `.coverage_baseline` to the new achieved total coverage, so the next sprint must exceed it.
+Each release includes:
+- Updated documentation
+- Linked issues
+- Changelog entries
+- GitHub release notes
 
-```bash
-# prints the total coverage line (proof)
-make coverage
+---
 
-# enforce minimum + 'must be higher than baseline'
-COVERAGE_MIN=0 make coverage-gate
-```
+## Hotfix & Rollback Strategy
+
+### Hotfix
+1. Bug is reported via GitHub Issue  
+2. Fix implemented in a hotfix branch  
+3. Patch version tagged (e.g., v0.2.1)  
+4. GitHub Release published  
+
+### Rollback
+If a release is unstable:
+- Revert to the last stable tag  
+- Create rollback release if needed  
+- Document rollback in release notes  
+
+---
+
+## Documentation
+
+Documentation is updated for every release to support onboarding:
+
+- `README.md` – Project overview & setup  
+- `CHANGELOG.md` – Version history  
+- `docs/development-setup.md`  
+- `docs/testing.md`  
+- `docs/releasing.md`  
+
+---
+
+## Deployment
+
+The web application can be deployed as a **Web Service** (e.g., on Render).
+
+When deploying:
+- The application listens on the `PORT` environment variable  
+- Static files are served via `/static/`  
+- `/healthz` endpoint is available for monitoring  
+
+---
+
+## Development Workflow
+
+1. Create user story or bug issue  
+2. Assign milestone  
+3. Implement feature/fix  
+4. Run tests locally  
+5. Merge via PR  
+6. Tag release  
+7. Update documentation  
+8. Publish GitHub Release  
