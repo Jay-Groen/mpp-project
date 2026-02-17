@@ -1,0 +1,49 @@
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor / IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Logs
+*.log
+
+# Environment files
+.env
+.env.local
+
+# Dependency folders
+node_modules/
+vendor/
+
+# Build outputs
+dist/
+build/
+out/
+bin/
+
+# Temporary files
+tmp/
+temp/
+
+# Coverage reports
+coverage/
+
+# Package lock files (optional, depends on project)
+# package-lock.json
+# go.sum
+
+# Compiled source
+*.exe
+*.dll
+*.so
+*.dylib
+
+# Archives
+*.zip
+*.tar
+*.gz
